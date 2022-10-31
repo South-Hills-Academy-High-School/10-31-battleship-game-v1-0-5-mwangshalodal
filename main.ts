@@ -38,6 +38,19 @@ function updatePX (whichPlayer: string) {
         }
     }
 }
+function placeAllCPUBoats () {
+    cpuPlaceBoat0()
+    cpuPlaceBoat1()
+    cpuPlaceBoat2()
+    mySprite = 1
+    while (isOverlapping(boatSpriteArrayP2)) {
+        cpuPlaceBoat1()
+    }
+    mySprite = 2
+    while (isOverlapping(boatSpriteArrayP2)) {
+        cpuPlaceBoat2()
+    }
+}
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (currentPlayer == "Player1") {
         rotateFlag = boatRotateArrayP1[currentBoat]
@@ -76,8 +89,7 @@ function isPlayerXWinner (enemyBoats: Sprite[][], hitOrMissPX: Sprite[]) {
     return killCount
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    cpuPlaceBoat0()
-    cpuPlaceBoat1()
+	
 })
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     rotateFlag = "nothing"
@@ -408,17 +420,26 @@ controller.menu.onEvent(ControllerButtonEvent.Pressed, function () {
             isHitOrMiss(boatSpriteArrayP2, hitOrMissP1)
             switchPlayer()
         } else {
+            let currentBoatSprite = 0
+            if (currentBoatSprite == 1) {
+                let CPUSOR: Sprite = null
+                game.splash("CPU Rove", "")
+                grid.place(CPUSOR, tiles.getTileLocation(randint(0, 6), randint(0, 10)))
+            } else {
+                isHitOrMiss(boatSpriteArrayP1, hitOrMissP2)
+                switchPlayer()
+            }
             isHitOrMiss(boatSpriteArrayP1, hitOrMissP2)
             switchPlayer()
         }
     } else {
         currentBoat += 1
-        grid.place(cursor, tiles.getTileLocation(0, 0))
-        if (currentBoat == 3) {
-            currentBoat = 0
-            switchPlayer()
-            moveBoatFlag += 1
-        }
+    }
+    grid.place(cursor, tiles.getTileLocation(0, 0))
+    if (currentBoat == 3) {
+        currentBoat = 0
+        switchPlayer()
+        moveBoatFlag += 1
     }
 })
 function initP2 () {
@@ -609,6 +630,22 @@ function makeBoatInvisible (boatArray: Sprite[]) {
         currentBoatSprite.setFlag(SpriteFlag.Invisible, true)
     }
 }
+function cpuPlaceBoat2 () {
+    makeBoatVisible(boatSpriteArrayP2[2])
+    if (randint(0, 1) == 0) {
+        grid.place(cursor, tiles.getTileLocation(randint(0, 6), randint(0, 6)))
+        grid.place(boatSpriteArrayP2[2][0], grid.add(grid.getLocation(cursor), 0, 0))
+        grid.place(boatSpriteArrayP2[2][1], grid.add(grid.getLocation(cursor), 1, 0))
+        grid.place(boatSpriteArrayP2[2][2], grid.add(grid.getLocation(cursor), 2, 0))
+        grid.place(boatSpriteArrayP2[2][3], grid.add(grid.getLocation(cursor), 3, 0))
+    } else {
+        grid.place(cursor, tiles.getTileLocation(randint(0, 9), randint(0, 3)))
+        grid.place(boatSpriteArrayP2[2][0], grid.add(grid.getLocation(cursor), 0, 0))
+        grid.place(boatSpriteArrayP2[2][1], grid.add(grid.getLocation(cursor), 0, 1))
+        grid.place(boatSpriteArrayP2[2][2], grid.add(grid.getLocation(cursor), 0, 2))
+        grid.place(boatSpriteArrayP2[2][3], grid.add(grid.getLocation(cursor), 0, 3))
+    }
+}
 function turnBoat (boatNum: number, boatRotateArray: string[]) {
     if (boatRotateArray[boatNum] == "up") {
         boatRotateArray[boatNum] = "sideways"
@@ -634,6 +671,7 @@ let hitOrMissP2: Sprite[] = []
 let hitOrMissP1: Sprite[] = []
 let currentBoatBoomCounter = 0
 let killCount = 0
+let mySprite = 0
 let boatRotateArrayP2: string[] = []
 let boatSpriteArrayP2: Sprite[][] = []
 let boatRotateArrayP1: string[] = []
@@ -645,9 +683,13 @@ let currentBoat = 0
 let rotateFlag = ""
 let currentPlayer = ""
 tiles.setCurrentTilemap(tilemap`level1`)
+let singlePlayuerFlag = 1
 currentPlayer = "Player1"
 initP1()
 initP2()
+if (singlePlayuerFlag == 1) {
+    placeAllCPUBoats()
+}
 rotateFlag = "nothing"
 currentBoat = 0
 moveBoatFlag = 1
